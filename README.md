@@ -98,7 +98,7 @@ All functions use TypeScript with ES2022 target and strict type checking.
 ### Environment Variables
 - Configuration via environment variables
 - `.env.example` template provided for each function
-- Sensitive data stored in AWS Systems Manager Parameter Store or Secrets Manager
+- Sensitive data (private keys) stored in AWS Systems Manager Parameter Store or Secrets Manager
 
 ### Build Process
 - TypeScript compilation to ES modules
@@ -151,7 +151,7 @@ aws lambda update-function-code \
 ### Data Protection
 - Environment variables for configuration
 - S3 server-side encryption
-- Secure SFTP connections
+- Secure SFTP connections with private key authentication
 
 ## Contributing
 

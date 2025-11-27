@@ -36,11 +36,13 @@ cp .env.example .env
 Edit `.env` with your SFTP and AWS configuration:
 
 ```env
-# SFTP Configuration
+# SFTP Configuration (Private Key Authentication)
 SFTP_HOST=sftp.referwell.com
 SFTP_PORT=22
 SFTP_USERNAME=paratus
-SFTP_PASSWORD=your-password
+SFTP_PRIVATE_KEY=-----BEGIN PRIVATE KEY-----
+MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC...
+-----END PRIVATE KEY-----
 SFTP_REMOTE_PATH=/
 
 # AWS Configuration
@@ -67,7 +69,7 @@ aws lambda create-function \
   --handler dist/index.handler \
   --role arn:aws:iam::123456789012:role/lambda-execution-role \
   --zip-file fileb://sftp-poller-lambda.zip \
-  --environment Variables={SFTP_HOST=sftp.example.com,SFTP_USERNAME=user,...}
+  --environment Variables={SFTP_HOST=sftp.example.com,SFTP_USERNAME=user,SFTP_PRIVATE_KEY=your-private-key,...}
 
 # Or update existing function:
 aws lambda update-function-code \
@@ -82,9 +84,7 @@ aws lambda update-function-code \
 | `SFTP_HOST` | ✅ | SFTP server hostname |
 | `SFTP_PORT` | ❌ | SFTP server port (default: 22) |
 | `SFTP_USERNAME` | ✅ | SFTP username |
-| `SFTP_PASSWORD` | ❌ | SFTP password (or use private key) |
-| `SFTP_PRIVATE_KEY` | ❌ | Private key for key-based auth |
-| `SFTP_PASSPHRASE` | ❌ | Passphrase for encrypted private key |
+| `SFTP_PRIVATE_KEY` | ✅ | Private key for key-based authentication |
 | `SFTP_REMOTE_PATH` | ❌ | Remote directory path (default: "/") |
 | `SFTP_APPOINTMENTS_BUCKET` | ✅ | S3 bucket for storing files |
 
@@ -196,9 +196,11 @@ handler(testEvent, {} as any)
 ### Common Issues
 
 **SFTP Connection Failed**
-- Verify credentials in environment variables
+- Verify private key and credentials in environment variables
 - Check network connectivity to SFTP server
 - Validate port and hostname
+- Ensure private key format is correct (PEM format, unencrypted)
+- Verify the private key matches the public key on the SFTP server
 
 **Lambda Timeout**
 - Increase timeout from default 3 minutes to 5 minutes
@@ -221,10 +223,10 @@ LOG_LEVEL=debug
 
 ## Security
 
-- SFTP credentials stored in Lambda environment variables
+- SFTP private key stored in Lambda environment variables
 - S3 bucket has server-side encryption enabled
 - IAM role follows principle of least privilege
-- Private keys stored securely and not logged
+- Private keys stored securely and not logged in plain text
 - S3 events automatically trigger downstream processing
 
 ## Next Steps

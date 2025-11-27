@@ -6,9 +6,7 @@ export interface SftpConfig {
   host: string;
   port: number;
   username: string;
-  password?: string | undefined;
-  privateKey?: string | undefined;
-  passphrase?: string | undefined;
+  privateKey: string;
 }
 
 export interface DownloadedFile {
@@ -49,9 +47,8 @@ export class SftpService {
         host: config.host,
         port: config.port,
         username: config.username,
-        password: config.password ?? undefined,
-        privateKey: config.privateKey ?? undefined,
-        passphrase: config.passphrase ?? undefined,
+        privateKey: config.privateKey,
+
         readyTimeout: 30000,
       });
 
@@ -173,13 +170,16 @@ export class SftpService {
    * Get SFTP configuration from environment variables
    */
   getSftpConfig(): SftpConfig {
+    const privateKey = process.env["SFTP_PRIVATE_KEY"];
+    if (!privateKey) {
+      throw new Error("SFTP_PRIVATE_KEY environment variable is required");
+    }
+
     return {
       host: process.env["SFTP_HOST"] || "",
       port: parseInt(process.env["SFTP_PORT"] || "22"),
       username: process.env["SFTP_USERNAME"] || "",
-      password: process.env["SFTP_PASSWORD"],
-      privateKey: process.env["SFTP_PRIVATE_KEY"],
-      passphrase: process.env["SFTP_PASSPHRASE"],
+      privateKey: privateKey,
     };
   }
 
@@ -193,10 +193,8 @@ export class SftpService {
     if (!config.username) {
       throw new Error("SFTP_USERNAME environment variable is required");
     }
-    if (!config.password && !config.privateKey) {
-      throw new Error(
-        "Either SFTP_PASSWORD or SFTP_PRIVATE_KEY environment variable is required",
-      );
+    if (!config.privateKey) {
+      throw new Error("SFTP_PRIVATE_KEY environment variable is required");
     }
   }
 }
