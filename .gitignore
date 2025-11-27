@@ -1,0 +1,54 @@
+# Dependencies
+node_modules/
+*/node_modules/
+
+# Build outputs
+dist/
+*/dist/
+*.zip
+*.js.map
+*.d.ts
+
+# Lambda deployment packages
+sftp-poller-lambda.zip
+*/sftp-poller-lambda.zip
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# TypeScript build artifacts
+*.tsbuildinfo
+
+# Package manager files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Temporary directories
+tmp/
+temp/
+*/tmp/
+*/temp/
+
+# Local development
+.localstack/
+terraform.tfstate*
+.terraform/

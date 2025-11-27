@@ -1,0 +1,29 @@
+{
+  "name": "sftp-poller-lambda",
+  "version": "1.0.0",
+  "description": "SFTP Poller Lambda for Referwell appointment ingestion",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "npx tsc",
+    "build:watch": "npx tsc --watch",
+    "package": "npm run build && zip -r ../sftp-poller-lambda.zip . -x \"*.ts\" \"*.ts.map\" \"*.test.*\"",
+    "test": "jest",
+    "test:watch": "jest --watch"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.808.0",
+    "ssh2-sftp-client": "^12.0.1"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.147",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^20.0.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.3.2",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=20.x"
+  }
+}
