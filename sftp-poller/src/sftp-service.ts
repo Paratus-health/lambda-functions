@@ -27,7 +27,15 @@ export class SftpService {
   private s3Client: S3Client;
 
   constructor() {
-    this.s3Client = new S3Client({});
+    const s3Config: any = {};
+
+    const localstackEndpoint = process.env["LOCALSTACK_ENDPOINT"];
+    if (localstackEndpoint) {
+      s3Config.endpoint = localstackEndpoint;
+      s3Config.forcePathStyle = true;
+    }
+
+    this.s3Client = new S3Client(s3Config);
   }
 
   /**
@@ -80,7 +88,8 @@ export class SftpService {
 
           // If processing was successful, delete the file from SFTP server
           if (result.status === "success") {
-            await sftp.delete(filePath);
+            // TODO: replace with transfer file into processing path
+            // await sftp.delete(filePath);
             console.log(
               `Successfully processed and deleted file: ${file.name}`,
             );
