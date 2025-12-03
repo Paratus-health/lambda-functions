@@ -2,9 +2,6 @@ import { Handler } from "aws-lambda";
 import { SftpService } from "./sftp-service.js";
 import { SSMClient, GetParameterCommand } from "@aws-sdk/client-ssm";
 
-const SSM_SECRET_NAME =
-  "/encryption/445567090044/uswe2/referwell-sftp-secrets-dev";
-
 interface EventBridgeEvent {
   version: string;
   id: string;
@@ -22,7 +19,9 @@ interface LambdaResponse {
   body: string;
 }
 
-const ssmClient = new SSMClient({ region: "us-west-2" });
+const ssmClient = new SSMClient({
+  region: process.env["REGION"] || "us-west-2",
+});
 
 // Updated helper to handle decryption
 const getParameter = async (name: string) => {
@@ -37,6 +36,7 @@ const getParameter = async (name: string) => {
 const loadEnvFromSSM = async () => {
   try {
     // 1. Reuse your existing helper
+    const SSM_SECRET_NAME = process.env["SSM_SECRET_NAME"] || "";
     const rawConfig = await getParameter(SSM_SECRET_NAME);
 
     if (!rawConfig) {
