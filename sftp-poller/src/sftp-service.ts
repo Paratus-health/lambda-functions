@@ -23,8 +23,10 @@ export interface FileProcessingResult {
   s3Key?: string;
 }
 
+// DO NOT CHANGE
 const REMOTE_SFTP_INCOMING = "/referwell/incoming";
 const REMOTE_SFTP_PROCESSING = "/referwell/processing";
+const REMOTE_S3_INCOMING = "referwell/incoming";
 
 export class SftpService {
   private s3Client: S3Client;
@@ -136,7 +138,8 @@ export class SftpService {
   ): Promise<FileProcessingResult> {
     try {
       // Generate unique S3 key
-      const s3Key = `sftp-appointments/${randomUUID()}-${filename}`;
+      const filenameWithoutExt = filename.replace(/\.[^/.]+$/, "");
+      const s3Key = `${REMOTE_S3_INCOMING}/${filenameWithoutExt}-${randomUUID()}.csv`;
 
       // Upload file to S3
       await this.uploadToS3(s3Key, content, filename);
