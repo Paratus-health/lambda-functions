@@ -94,15 +94,16 @@ export class SftpService {
 
           results.push(result);
 
-          console.log(
-            `Moving file to Processing from SFTP server: ${file.name}`
-          );
-          await sftp.rename(filePath, `${fullProcessingPath}/${file.name}`);
-
-          // If processing was successful, delete the file from SFTP server
+          // Only move to Processing if processing was successful
           if (result.status === "success") {
             console.log(
-              `Successfully processed and deleted file: ${file.name}`
+              `Moving file to Processing from SFTP server: ${file.name}`
+            );
+            await sftp.rename(filePath, `${fullProcessingPath}/${file.name}`);
+            console.log(`Successfully processed and moved file: ${file.name}`);
+          } else {
+            console.warn(
+              `File processing failed, leaving file in Incoming: ${file.name}`
             );
           }
         } catch (fileError) {
