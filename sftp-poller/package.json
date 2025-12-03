@@ -8,11 +8,11 @@
     "build": "npx tsc",
     "build:watch": "npx tsc --watch",
     "package": "npm run build && zip -r ../sftp-poller-lambda.zip . -x \"*.ts\" \"*.ts.map\" \"*.test.*\"",
-    "test": "jest",
-    "test:watch": "jest --watch"
+    "test": "jest"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.808.0",
+    "@aws-sdk/client-ssm": "^3.943.0",
     "dotenv": "^17.2.3",
     "ssh2-sftp-client": "^12.0.1"
   },

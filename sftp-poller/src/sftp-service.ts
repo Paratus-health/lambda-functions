@@ -23,6 +23,9 @@ export interface FileProcessingResult {
   s3Key?: string;
 }
 
+const REMOTE_SFTP_INCOMING = "/referwell/incoming";
+const REMOTE_SFTP_PROCESSING = "/referwell/processing";
+
 export class SftpService {
   private s3Client: S3Client;
 
@@ -43,7 +46,7 @@ export class SftpService {
    */
   async pollSftpServer(
     config: SftpConfig,
-    remotePath: string = "/",
+    remotePath: string = "/"
   ): Promise<FileProcessingResult[]> {
     const sftp = new Client();
     const results: FileProcessingResult[] = [];
@@ -60,14 +63,19 @@ export class SftpService {
         readyTimeout: 30000,
       });
 
-      console.log(`Connected to SFTP server, listing files in: ${remotePath}`);
+      const fullIncomingPath = `${remotePath}${REMOTE_SFTP_INCOMING}`;
+      const fullProcessingPath = `${remotePath}${REMOTE_SFTP_PROCESSING}`;
 
-      const files = await sftp.list(remotePath);
+      console.log(
+        `Connected to SFTP server, listing files in: ${fullIncomingPath}`
+      );
+
+      const files = await sftp.list(fullIncomingPath);
       console.log(`Found ${files.length} files in remote directory`);
 
       // Filter for CSV files (assuming appointment files are CSV)
       const csvFiles = files.filter(
-        (file) => file.name.toLowerCase().endsWith(".csv") && file.type === "-",
+        (file) => file.name.toLowerCase().endsWith(".csv") && file.type === "-"
       );
 
       console.log(`Processing ${csvFiles.length} CSV files`);
@@ -76,22 +84,25 @@ export class SftpService {
         try {
           console.log(`Processing file: ${file.name}`);
 
-          const filePath = `${remotePath}/${file.name}`;
+          const filePath = `${fullIncomingPath}/${file.name}`;
           const fileBuffer = await sftp.get(filePath);
 
           const result = await this.processDownloadedFile(
             file.name,
-            fileBuffer as Buffer,
+            fileBuffer as Buffer
           );
 
           results.push(result);
 
+          console.log(
+            `Moving file to Processing from SFTP server: ${file.name}`
+          );
+          await sftp.rename(filePath, `${fullProcessingPath}/${file.name}`);
+
           // If processing was successful, delete the file from SFTP server
           if (result.status === "success") {
-            // TODO: replace with transfer file into processing path
-            // await sftp.delete(filePath);
             console.log(
-              `Successfully processed and deleted file: ${file.name}`,
+              `Successfully processed and deleted file: ${file.name}`
             );
           }
         } catch (fileError) {
@@ -120,7 +131,7 @@ export class SftpService {
    */
   private async processDownloadedFile(
     filename: string,
-    content: Buffer,
+    content: Buffer
   ): Promise<FileProcessingResult> {
     try {
       // Generate unique S3 key
@@ -150,13 +161,13 @@ export class SftpService {
   private async uploadToS3(
     key: string,
     content: Buffer,
-    filename: string,
+    filename: string
   ): Promise<void> {
     const bucketName = process.env["SFTP_APPOINTMENTS_BUCKET"];
 
     if (!bucketName) {
       throw new Error(
-        "SFTP_APPOINTMENTS_BUCKET environment variable is not set",
+        "SFTP_APPOINTMENTS_BUCKET environment variable is not set"
       );
     }
 
